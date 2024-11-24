@@ -40,6 +40,17 @@ order by date desc,hits desc""")
 
 top5_ips_df.show()
 
+# Write DataFrame to CSV File
+output_path = "output/top5_ips_daily"  # Specify your output path
+
+top5_ips_df.coalesce(1)\
+    .write\
+    .option("header", True)\
+    .option("delimiter", ";")\
+    .mode("overwrite")\
+    .csv(output_path)               
+
+
 top5_devices_df = spark.sql(f"""with day_device_cnt as (
     select date,device,count(1) as hits 
     from {db_name}.{table_name}
@@ -56,7 +67,18 @@ order by date desc,hits desc""")
 
 top5_devices_df.show()
 
+# Write DataFrame to CSV File
+output_path = "output/top5_devices_daily"  # Specify your output path
+
+top5_devices_df.coalesce(1)\
+    .write\
+    .option("header", True)\
+    .option("delimiter", ";")\
+    .mode("overwrite")\
+    .csv(output_path)
+
 print("Showing the Weekly Analytical Queries")
+
 weekly_top5_ips_df = spark.sql(f"""with week_ip_cnt as (
     select DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)) as week_date,ip,count(1) as hits
     from {db_name}.{table_name}
@@ -70,7 +92,18 @@ ranked_week_ip_cnt as (
 select week_date,ip,hits from ranked_week_ip_cnt
 where rn<=5
 order by week_date desc,hits desc""")
+
 weekly_top5_ips_df.show()
+
+# Write DataFrame to CSV File
+output_path = "output/top5_ips_weekly"  # Specify your output path
+
+weekly_top5_ips_df.coalesce(1)\
+    .write\
+    .option("header", True)\
+    .option("delimiter", ";")\
+    .mode("overwrite")\
+    .csv(output_path)
 
 weekly_top5_devices_df = spark.sql(f"""with week_device_cnt as (
     select DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)) as week_date,device,count(1) as hits
@@ -87,3 +120,13 @@ where rn<=5
 order by week_date desc,hits desc""")
 
 weekly_top5_devices_df.show()
+
+# Write DataFrame to CSV File
+output_path = "output/top5_devices_weekly"  # Specify your output path
+
+weekly_top5_devices_df.coalesce(1)\
+    .write\
+    .option("header", True)\
+    .option("delimiter", ";")\
+    .mode("overwrite")\
+    .csv(output_path)
