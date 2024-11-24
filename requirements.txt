@@ -1,0 +1,9 @@
+Faker==33.0.0
+py4j==0.10.9.7
+pyspark==3.5.1
+python-dateutil==2.9.0.post0
+PyYAML==6.0.2
+six==1.16.0
+typing_extensions==4.12.2
+ua-parser==0.18.0
+user-agents==2.2.0
