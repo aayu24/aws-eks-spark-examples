@@ -15,6 +15,7 @@ class LoadProperties:
         self.table_name = js["table_name"]
         self.input_path = js["input_path"]
         self.mode = js["mode"]
+        self.output_dir = js["output_dir"]
 
     def getWarehousePath(self):
         return self.warehouse_path
@@ -36,3 +37,6 @@ class LoadProperties:
     
     def getMode(self):
         return self.mode
+    
+    def getOutputDir(self):
+        return self.output_dir

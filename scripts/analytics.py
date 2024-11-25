@@ -81,14 +81,19 @@ where rn<=5
 order by week_date desc,hits desc"""
 
 if __name__ == "__main__":
-    if len(sys.argv)>= 1:
+    mode = None
+    output_dir = None
+    if len(sys.argv) >= 3:
         mode = sys.argv[1]
-    mode = "local" if mode is None else mode
+        output_dir = sys.argv[2]
+    
+    mode = properties.getMode() if mode is None else mode
+    output_dir = properties.getOutputDir() if output_dir is None else output_dir
     spark = get_spark_session(mode)
-    queries = [{"query": top5_ips_query, "path": "output/top5_ips_daily"}, 
-               {"query" : top5_devices_query, "path": "output/top5_devices_daily"}, 
-               {"query": weekly_top5_ips_query, "path": "output/top5_ips_weekly"}, 
-               {"query": weekly_top5_devices_query, "path": "output/top5_devices_weekly"}]
+    queries = [{"query": top5_ips_query, "path": f"{output_dir}/top5_ips_daily"}, 
+               {"query" : top5_devices_query, "path": f"{output_dir}/top5_devices_daily"}, 
+               {"query": weekly_top5_ips_query, "path": f"{output_dir}/top5_ips_weekly"}, 
+               {"query": weekly_top5_devices_query, "path": f"{output_dir}/top5_devices_weekly"}]
     for query in queries:
         execute_query(spark, query["query"],query["path"])
     

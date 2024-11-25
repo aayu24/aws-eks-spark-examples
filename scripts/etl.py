@@ -84,7 +84,7 @@ def load(spark: SparkSession, logs_parsed_df: DataFrame, db_name="demo", table_n
     # Create Table First
     create_table(spark,db_name,table_name)
     # Write To Table
-    logs_parsed_df.write.format("iceberg").mode("overwrite").saveAsTable(f"{db_name}.{table_name}")
+    logs_parsed_df.write.coalesce(3).format("iceberg").mode("overwrite").saveAsTable(f"{db_name}.{table_name}")
 
 def execute(spark: SparkSession, input_file: str, db_name: str, table_name: str):
     load(spark,transform(extract(spark,input_file)),db_name,table_name)

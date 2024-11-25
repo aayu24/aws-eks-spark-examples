@@ -13,17 +13,18 @@ python3 -m venv myenv && source myenv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Unzip the data.zip file
+3. Complete AWS CLI setup and export following variables.
 ```bash
-python3 -m zipfile -e data.zip .
+export AWS_ACCESS_KEY_ID='your_access_key_id' \
+export AWS_SECRET_ACCESS_KEY='your_secret_access_key'
 ```
 
-4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/demo/logs folder.
+4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/logs folder in s3 bucket
 ```bash
 spark-submit --properties-file spark-app.conf scripts/etl.py sparksubmit s3a://granica-demo-logs-data/really_large_access.log
 ```
 
-5. Run the scripts/analytics.py file to get top5 query output.
+5. Run the scripts/analytics.py file to get top5 query output in s3 bucket.
 ```bash
-spark-submit --properties-file spark-app.conf scripts/analytics.py sparksubmit
+spark-submit --properties-file spark-app.conf scripts/analytics.py sparksubmit s3a://granica-demo-logs-data/output
 ```

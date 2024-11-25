@@ -33,8 +33,11 @@ def get_spark_session(mode="local"):
     elif mode=="sparksubmit":
         # All conf args would be passed from spark-args.conf file
         conf = SparkConf()\
-            .set("spark.hadoop.fs.s3a.access.key",os.environ["AWS_ACCESS_KEY"])\
-            .set("spark.hadoop.fs.s3a.secret.key",os.environ["AWS_SECRET_KEY"])
+            .set(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog") \
+            .set(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse_path) \
+            .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type) \
+            .set("spark.sql.warehouse.dir", warehouse_path)
+            
 
         spark = SparkSession\
                 .builder\
