@@ -46,8 +46,8 @@ conf = SparkConf().setAppName("Test") \
     .set(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog") \
     .set('spark.jars.packages', iceberg_spark_jar) \
     .set(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse_path) \
-    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type)
-    # .set("spark.sql.warehouse.dir", warehouse_path)\
+    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type) \
+    .set("spark.sql.warehouse.dir", warehouse_path) # To avoid creation of empty spark-warehouse folder
     # .set("spark.sql.defaultCatalog", catalog_name)
     # .set("hive.metastore.schema.verification", "false") \
     # .set("hive.metastore.schema.verification.record.version", "false")
