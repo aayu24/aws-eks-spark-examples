@@ -13,21 +13,18 @@ python3 -m venv myenv && source myenv/bin/activate
 pip install -r requirements.txt
 ```
 
-3. Unzip the data.zip file
+3. Complete AWS CLI setup and export following variables.
 ```bash
-python3 -m zipfile -e data.zip .
+export AWS_ACCESS_KEY_ID='your_access_key_id' \
+export AWS_SECRET_ACCESS_KEY='your_secret_access_key'
 ```
 
-4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/demo/logs folder.
+4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/logs folder in s3 bucket
 ```bash
-python3 scripts/etl.py
+spark-submit --properties-file spark-app.conf scripts/etl.py sparksubmit s3a://granica-demo-logs-data/really_large_access.log
 ```
 
-5. Run the scripts/analytics.py file to get top5 query output.
+5. Run the scripts/analytics.py file to get top5 query output in s3 bucket.
 ```bash
-python3 scripts/analytics.py
-```
-6. One can use spark-submit as well to launch the application using below command. To run the ETL pipeline - 
-```bash
-spark-submit --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/etl.py
+spark-submit --properties-file spark-app.conf scripts/analytics.py sparksubmit s3a://granica-demo-logs-data/output
 ```

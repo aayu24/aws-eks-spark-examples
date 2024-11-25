@@ -1,0 +1,10 @@
+{
+    "warehouse_path": "s3a://granica-demo-spark-warehouse",
+    "catalog_name": "demo",
+    "catalog_type": "hadoop",
+    "iceberg_spark_jar": "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0",
+    "table_name": "logs",
+    "input_path": "really_large_access.log",
+    "mode": "local",
+    "output_dir": "output"
+}
