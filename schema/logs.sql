@@ -13,4 +13,5 @@ CREATE TABLE IF NOT EXISTS demo.logs (
     useragent STRING,
     device STRING
 ) USING ICEBERG
-LOCATION 'warehouse/demo/logs';
+LOCATION 'warehouse/demo/logs'
+PARTITIONED BY (date);

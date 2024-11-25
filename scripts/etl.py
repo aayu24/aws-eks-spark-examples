@@ -118,6 +118,7 @@ CREATE TABLE IF NOT EXISTS {db_name}.{table_name} (
     device STRING
 ) USING ICEBERG
 LOCATION 'warehouse/{table_name}' 
+PARTITIONED BY (date)
 """
 print(query)
 spark.sql(query)
