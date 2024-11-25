@@ -1,31 +1,30 @@
-from pyspark import SparkConf
-from pyspark.sql import SparkSession
+from pyspark.sql import SparkSession, DataFrame
+from spark_utils import get_spark_session
+from LoadProperties import LoadProperties
+import sys
 
-warehouse_path = "warehouse"
-iceberg_spark_jar  = 'org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0'
-catalog_name = "demo"
-catalog_type = "hadoop" # "hive"
-db_name = "demo"
-table_name = "logs"
+properties = LoadProperties()
+db_name = properties.getCatalogName()
+table_name = properties.getTableName()
 
-# Setup iceberg config
-conf = SparkConf().setAppName("Test") \
-    .set("spark.sql.extensions", "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions") \
-    .set(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog") \
-    .set('spark.jars.packages', iceberg_spark_jar) \
-    .set(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse_path) \
-    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type) \
-    .set("spark.sql.warehouse.dir", warehouse_path) # To avoid creation of empty spark-warehouse folder
-    # .set("spark.sql.defaultCatalog", catalog_name)
+def save_results(df: DataFrame, output_path: str):
+    df.coalesce(1)\
+        .write\
+        .option("header", True)\
+        .option("delimiter", ";")\
+        .mode("overwrite")\
+        .csv(output_path)
+    
+def fetch_results(spark: SparkSession, query: str):
+    df = spark.sql(query)
+    df.show()
+    return df
 
-spark = SparkSession\
-    .builder\
-    .config(conf=conf)\
-    .getOrCreate()
-
+def execute_query(spark: SparkSession, query: str, output_path: str):
+    save_results(fetch_results(spark,query),output_path)
 
 # Top 5 ip addresses by request count
-top5_ips_df = spark.sql(f"""with day_ip_cnt as (
+top5_ips_query = f"""with day_ip_cnt as (
     select date,ip,count(1) as hits
     from {db_name}.{table_name}
     group by date,ip
@@ -37,22 +36,9 @@ ranked_day_ip_cnt as (
 )
 select date,ip,hits from ranked_day_ip_cnt
 where rn<=5
-order by date desc,hits desc""")
-
-top5_ips_df.show()
-
-# Write DataFrame to CSV File
-output_path = "output/top5_ips_daily"  # Specify your output path
-
-top5_ips_df.coalesce(1)\
-    .write\
-    .option("header", True)\
-    .option("delimiter", ";")\
-    .mode("overwrite")\
-    .csv(output_path)               
-
-
-top5_devices_df = spark.sql(f"""with day_device_cnt as (
+order by date desc,hits desc"""
+          
+top5_devices_query = f"""with day_device_cnt as (
     select date,device,count(1) as hits 
     from {db_name}.{table_name}
     group by date,device
@@ -64,23 +50,9 @@ ranked_day_device_cnt as (
 )
 select date,device,hits from ranked_day_device_cnt
 where rn<=5
-order by date desc,hits desc""")
+order by date desc,hits desc"""
 
-top5_devices_df.show()
-
-# Write DataFrame to CSV File
-output_path = "output/top5_devices_daily"  # Specify your output path
-
-top5_devices_df.coalesce(1)\
-    .write\
-    .option("header", True)\
-    .option("delimiter", ";")\
-    .mode("overwrite")\
-    .csv(output_path)
-
-print("Showing the Weekly Analytical Queries")
-
-weekly_top5_ips_df = spark.sql(f"""with week_ip_cnt as (
+weekly_top5_ips_query = f"""with week_ip_cnt as (
     select DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)) as week_date,ip,count(1) as hits
     from {db_name}.{table_name}
     group by DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)),ip
@@ -92,21 +64,9 @@ ranked_week_ip_cnt as (
 )
 select week_date,ip,hits from ranked_week_ip_cnt
 where rn<=5
-order by week_date desc,hits desc""")
+order by week_date desc,hits desc"""
 
-weekly_top5_ips_df.show()
-
-# Write DataFrame to CSV File
-output_path = "output/top5_ips_weekly"  # Specify your output path
-
-weekly_top5_ips_df.coalesce(1)\
-    .write\
-    .option("header", True)\
-    .option("delimiter", ";")\
-    .mode("overwrite")\
-    .csv(output_path)
-
-weekly_top5_devices_df = spark.sql(f"""with week_device_cnt as (
+weekly_top5_devices_query = f"""with week_device_cnt as (
     select DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)) as week_date,device,count(1) as hits
     from {db_name}.{table_name}
     group by DATE_SUB(DATE(timestamp), (DAYOFWEEK(timestamp) - 1)),device
@@ -118,16 +78,17 @@ ranked_week_device_cnt as (
 )
 select week_date,device,hits from ranked_week_device_cnt
 where rn<=5
-order by week_date desc,hits desc""")
+order by week_date desc,hits desc"""
 
-weekly_top5_devices_df.show()
-
-# Write DataFrame to CSV File
-output_path = "output/top5_devices_weekly"  # Specify your output path
-
-weekly_top5_devices_df.coalesce(1)\
-    .write\
-    .option("header", True)\
-    .option("delimiter", ";")\
-    .mode("overwrite")\
-    .csv(output_path)
+if __name__ == "__main__":
+    if len(sys.argv)>= 1:
+        mode = sys.argv[1]
+    mode = "local" if mode is None else mode
+    spark = get_spark_session(mode)
+    queries = [{"query": top5_ips_query, "path": "output/top5_ips_daily"}, 
+               {"query" : top5_devices_query, "path": "output/top5_devices_daily"}, 
+               {"query": weekly_top5_ips_query, "path": "output/top5_ips_weekly"}, 
+               {"query": weekly_top5_devices_query, "path": "output/top5_devices_weekly"}]
+    for query in queries:
+        execute_query(spark, query["query"],query["path"])
+    

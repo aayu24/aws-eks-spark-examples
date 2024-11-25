@@ -20,14 +20,10 @@ python3 -m zipfile -e data.zip .
 
 4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/demo/logs folder.
 ```bash
-python3 scripts/etl.py
+spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 --py-files scripts/log_parser_utils.py scripts/etl.py sparksubmit really_large_access.log
 ```
 
 5. Run the scripts/analytics.py file to get top5 query output.
 ```bash
-python3 scripts/analytics.py
-```
-6. One can use spark-submit as well to launch the application using below command. To run the ETL pipeline - 
-```bash
-spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/etl.py sparksubmit really_large_access.log
+spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/analytics.py sparksubmit
 ```
