@@ -20,10 +20,10 @@ python3 -m zipfile -e data.zip .
 
 4. Run the scripts/etl.py file to load the data. This creates a local Iceberg Table in warehouse/demo/logs folder.
 ```bash
-spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 --py-files scripts/log_parser_utils.py scripts/etl.py sparksubmit really_large_access.log
+spark-submit --properties-file spark-app.conf scripts/etl.py sparksubmit s3a://granica-demo-logs-data/really_large_access.log
 ```
 
 5. Run the scripts/analytics.py file to get top5 query output.
 ```bash
-spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/analytics.py sparksubmit
+spark-submit --properties-file spark-app.conf scripts/analytics.py sparksubmit
 ```

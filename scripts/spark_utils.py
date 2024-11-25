@@ -1,6 +1,7 @@
 from pyspark import SparkConf
 from pyspark.sql import SparkSession
 from LoadProperties import LoadProperties
+import os
 
 properties = LoadProperties()
 
@@ -31,6 +32,13 @@ def get_spark_session(mode="local"):
     
     elif mode=="sparksubmit":
         # All conf args would be passed from spark-args.conf file
-        return SparkSession\
+        conf = SparkConf()\
+            .set("spark.hadoop.fs.s3a.access.key",os.environ["AWS_ACCESS_KEY"])\
+            .set("spark.hadoop.fs.s3a.secret.key",os.environ["AWS_SECRET_KEY"])
+
+        spark = SparkSession\
                 .builder\
+                .config(conf=conf)\
                 .getOrCreate()
+        
+        return spark
