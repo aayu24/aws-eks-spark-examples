@@ -46,8 +46,9 @@ conf = SparkConf().setAppName("Test") \
     .set(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog") \
     .set('spark.jars.packages', iceberg_spark_jar) \
     .set(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse_path) \
-    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type)\
-    .set("spark.sql.defaultCatalog", catalog_name)
+    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type)
+    # .set("spark.sql.warehouse.dir", warehouse_path)\
+    # .set("spark.sql.defaultCatalog", catalog_name)
     # .set("hive.metastore.schema.verification", "false") \
     # .set("hive.metastore.schema.verification.record.version", "false")
 
@@ -116,8 +117,7 @@ CREATE TABLE IF NOT EXISTS {db_name}.{table_name} (
     status STRING,
     useragent STRING,
     device STRING
-) USING ICEBERG
-LOCATION 'warehouse/{table_name}' 
+) USING ICEBERG 
 PARTITIONED BY (date)
 """
 print(query)

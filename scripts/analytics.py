@@ -14,8 +14,8 @@ conf = SparkConf().setAppName("Test") \
     .set(f"spark.sql.catalog.{catalog_name}", "org.apache.iceberg.spark.SparkCatalog") \
     .set('spark.jars.packages', iceberg_spark_jar) \
     .set(f"spark.sql.catalog.{catalog_name}.warehouse", warehouse_path) \
-    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type)\
-    .set("spark.sql.defaultCatalog", catalog_name)
+    .set(f"spark.sql.catalog.{catalog_name}.type", catalog_type)
+    # .set("spark.sql.defaultCatalog", catalog_name)
 
 spark = SparkSession\
     .builder\
