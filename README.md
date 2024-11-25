@@ -29,5 +29,5 @@ python3 scripts/analytics.py
 ```
 6. One can use spark-submit as well to launch the application using below command. To run the ETL pipeline - 
 ```bash
-spark-submit --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/etl.py
+spark-submit --properties-file spark-app.conf --packages org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0 scripts/etl.py sparksubmit really_large_access.log
 ```

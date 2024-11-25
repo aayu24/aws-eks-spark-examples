@@ -139,15 +139,13 @@ def load(logs_parsed_df: DataFrame, db_name="demo", table_name="logs"):
 
 
 if __name__ == "__main__":
-    mode=None
-    file=None
-    if len(sys.argv) == 3:
-        mode = sys.argv[1]
-        file = sys.argv[2]
-    else:
-        print("Need to pass environment and input file loc")
-        mode="local"
-        file="really_large_access.log"
+    mode=sys.argv[1]
+    file=sys.argv[2]
+
+    mode = "local" if mode is None else mode
+    file = "really_large_access.log" if file is None else file
+
+    print(f"Mode: {mode}, File: {file}")
 
     spark = get_spark_session(mode)
     logs_df = extract(spark,file)
