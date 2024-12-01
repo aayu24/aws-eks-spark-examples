@@ -75,10 +75,10 @@ module "eks" {
   eks_managed_node_groups = {
     granica-cluster-wg = {
       min_size     = 3
-      max_size     = 4
+      max_size     = 5
       desired_size = 3
 
-      instance_types = ["t2.micro"]
+      instance_types = ["t3.large"]
       capacity_type  = "SPOT"
 
       tags = {
