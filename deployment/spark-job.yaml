@@ -1,0 +1,73 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: granica-spark-demo
+  namespace: default
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: public.ecr.aws/b1m7t7i1/pyspark-granica-demo:v1
+  imagePullPolicy: IfNotPresent
+  mainApplicationFile: s3a://granica-demo-logs-data/scripts/etl.py
+  sparkVersion: 3.5.1
+  hadoopConf:
+    "fs.s3a.path.style.access": "true"
+    "fs.s3a.impl": "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "fs.s3a.endpoint": "s3.us-east-2.amazonaws.com"
+  deps:
+    packages:
+      - org.apache.hadoop:hadoop-common:3.3.4
+      - org.apache.hadoop:hadoop-aws:3.3.4
+      - org.apache.hadoop:hadoop-client-api:3.3.4
+      - org.apache.hadoop:hadoop-client-runtime:3.3.4
+      - com.amazonaws:aws-java-sdk-bundle:1.12.262
+      - org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0
+    pyFiles:
+      - local:///opt/spark/work-dir/scripts/log_parser_utils.py
+      - local:///opt/spark/work-dir/scripts/spark_utils.py
+      - local:///opt/spark/work-dir/scripts/LoadProperties.py  
+  sparkConf:
+    "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
+    "spark.eventLog.enabled" : "true"
+    "spark.eventLog.dir" : "s3a://granica-demo-logs-data/history-server"
+    "spark.history.fs.logDirectory" : "s3a://granica-demo-logs-data/history-server" 
+    "spark.driver.extraJavaOptions" : "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+    "spark.kubernetes.file.upload.path": "/opt/spark/work-dir"
+  arguments:
+    - sparksubmit
+    - s3a://granica-demo-logs-data/really_large_access.log
+  driver:
+    cores: 1
+    memory: 1G
+    serviceAccount: spark
+    labels:
+      version: 3.5.1
+    env:
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef: 
+            name: aws-secrets
+            key: aws-secret-key
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom: 
+          secretKeyRef:
+            name: aws-secrets
+            key: aws-access-key
+  executor:
+    instances: 3
+    cores: 1
+    memory: 1G
+    labels:
+      version: 3.5.1
+    env:
+      - name: AWS_SECRET_ACCESS_KEY
+        valueFrom:
+          secretKeyRef: 
+            name: aws-secrets
+            key: aws-secret-key
+      - name: AWS_ACCESS_KEY_ID
+        valueFrom: 
+          secretKeyRef:
+            name: aws-secrets
+            key: aws-access-key      
