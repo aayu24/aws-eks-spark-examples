@@ -7,8 +7,7 @@ spec:
   type: Python
   pythonVersion: "3"
   mode: cluster
-  image: docker.io/library/local_spark:v4
-  # image: public.ecr.aws/b1m7t7i1/spark3.5.1-hadoop3.3.4-aws-java-sdk-bundle-1.12.767:latest
+  image: public.ecr.aws/b1m7t7i1/pyspark-granica-demo:v1
   imagePullPolicy: IfNotPresent
   mainApplicationFile: s3a://granica-demo-logs-data/scripts/etl.py
   sparkVersion: 3.5.1
@@ -40,7 +39,7 @@ spec:
     - s3a://granica-demo-logs-data/really_large_access.log
   driver:
     cores: 1
-    memory: 512m
+    memory: 1G
     serviceAccount: spark
     labels:
       version: 3.5.1
@@ -56,9 +55,9 @@ spec:
             name: aws-secrets
             key: aws-access-key
   executor:
-    instances: 1
+    instances: 3
     cores: 1
-    memory: 512m
+    memory: 1G
     labels:
       version: 3.5.1
     env:
