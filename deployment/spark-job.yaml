@@ -1,0 +1,34 @@
+apiVersion: sparkoperator.k8s.io/v1beta2
+kind: SparkApplication
+metadata:
+  name: granica-spark-demo
+  namespace: default
+spec:
+  type: Python
+  pythonVersion: "3"
+  mode: cluster
+  image: public.ecr.aws/b1m7t7i1/spark3.5.1-hadoop3.3.4-aws-java-sdk-bundle-1.12.767:latest
+  imagePullPolicy: IfNotPresent
+  mainApplicationFile: s3a://granica-demo-logs-data/scripts/etl.py
+  sparkVersion: 3.5.1
+  sparkConf:
+    "spark.sql.extensions": "org.apache.iceberg.spark.extensions.IcebergSparkSessionExtensions"
+    "spark.hadoop.fs.s3a.endpoint": "s3.us-east-2.amazonaws.com"
+    "spark.hadoop.fs.s3a.impl" : "org.apache.hadoop.fs.s3a.S3AFileSystem"
+    "spark.eventLog.enabled" : "true"
+    "spark.eventLog.dir" : "s3a://granica-demo-logs-data/history-server"
+    "spark.jars.packages" : "org.apache.iceberg:iceberg-spark-runtime-3.5_2.12:1.7.0,org.apache.hadoop:hadoop-aws:3.3.4,com.amazonaws:aws-java-sdk-bundle:1.12.262"
+    "spark.submit.pyFiles" : "s3a://granica-demo-logs-data/scripts/log_parser_utils.py"
+    "spark.history.fs.logDirectory" : "s3a://granica-demo-logs-data/history-server" 
+    "spark.driver.extraJavaOptions" : "-Divy.cache.dir=/tmp -Divy.home=/tmp"
+  arguments:
+    - sparksubmit
+    - s3a://granica-demo-logs-data/really_large_access.log
+  driver:
+    cores: 1
+    memory: 1G
+    serviceAccount: spark
+  executor:
+    instances: 2
+    cores: 1
+    memory: 1G
